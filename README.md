@@ -53,7 +53,7 @@ Initial non-preemptive EDF scheduling model.
 
 
 
-\## EDF vs. Fixed-Priority Scheduling
+## EDF vs. Fixed-Priority Scheduling
 
 
 
