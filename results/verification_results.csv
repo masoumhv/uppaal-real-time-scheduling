@@ -1,0 +1,4 @@
+Scenario,Policy,Model,Result
+Comparison,EDF,models\edf_arrivals_3tasks.xml,SATISFIED
+NegativeTest,EDF,models\edf_arrivals_3tasks_unschedulable.xml,NOT SATISFIED
+Comparison,FPS,models\fps_arrivals_3tasks.xml,NOT SATISFIED

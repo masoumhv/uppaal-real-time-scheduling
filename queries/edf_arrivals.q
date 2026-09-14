@@ -1,0 +1,1 @@
+A[] not (T0.Missed || T1.Missed || T2.Missed)
