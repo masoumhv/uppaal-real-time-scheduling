@@ -1,75 +1,130 @@
 # Real-Time Task Scheduling Verification with UPPAAL
 
-Formal modeling and verification of non-preemptive EDF scheduling
+Formal modeling and verification of non-preemptive real-time scheduling
 on a shared CPU using UPPAAL timed automata.
+
+The project includes Earliest Deadline First (EDF) and Fixed-Priority
+Scheduling (FPS), task release times, deadline verification, and automated
+verification using Python and UPPAAL `verifyta`.
 
 ## Model
 
 The system consists of parameterized real-time tasks and a shared CPU.
 
-Each task has:
+Each task includes:
 
-* bounded execution time
-* deadline
-* Ready, Running, Finished, and Missed locations
+- a release time
+- bounded execution time
+- a deadline
+- `NotReleased`, `Ready`, `Running`, `Finished`, and `Missed` locations
 
-The CPU uses a non-preemptive Earliest Deadline First (EDF) policy.
+Scheduling is non-preemptive: once a task starts executing, it runs until
+completion before another ready task can use the CPU.
 
 ## Verification
 
-Main safety property:
+The main safety property checks that no task reaches the `Missed` location:
 
-A\[] not (T0.Missed || T1.Missed || T2.Missed)
+```text
+A[] not (T0.Missed || T1.Missed || T2.Missed)
+```
 
-The model was evaluated using both schedulable and unschedulable
-three-task configurations.
+Verification is performed using the UPPAAL verifier and the command-line
+`verifyta` tool.
 
-## Results
+## Initial EDF Models
 
-|Task Set|Deadlines|Result|
-|-|-|-|
-|Schedulable|{12, 7, 5}|Property satisfied|
-|Unschedulable|{10, 6, 4}|Deadline violation (T1)|
+The initial version of the project evaluated schedulable and unschedulable
+three-task EDF configurations.
+
+| Task Set | Deadlines | Result |
+|---|---|---|
+| Schedulable | {12, 7, 5} | Property satisfied |
+| Unschedulable | {10, 6, 4} | Deadline violation detected |
 
 UPPAAL diagnostic traces were used to inspect deadline violations.
 
-## Repository
+## Arrival-Aware Scheduling
 
-models/
-├── edf\_3tasks\_schedulable.xml
-└── edf\_3tasks\_unschedulable.xml
+The model was extended with explicit task release times.
 
-## v1.0
+Tasks begin in the `NotReleased` location and become ready at their specified
+release times. Dispatch is urgent when the CPU is free and an eligible task is
+ready.
 
-Initial non-preemptive EDF scheduling model.
-
-## Next Steps
-
-* Task release/arrival times
-* Fixed-Priority Scheduling
-* EDF vs. Fixed-Priority comparison
-
-
-
-
+Both schedulable and unschedulable arrival-aware EDF scenarios are included.
 
 ## EDF vs. Fixed-Priority Scheduling
 
+A common synthetic workload is used to compare non-preemptive EDF and FPS.
 
+| Task | Release Time | Execution Time | Deadline | FPS Priority |
+|---|---:|---:|---:|---:|
+| T0 | 0 | 2–3 | 8 | 0 |
+| T1 | 1 | 1–2 | 5 | 2 |
+| T2 | 1 | 2–3 | 8 | 1 |
 
-EDF selects the ready task with the earliest deadline.
+Lower priority values indicate higher fixed priority.
 
+Under EDF, T1 is selected before T2 because it has the earlier deadline.
+The deadline-miss safety property is satisfied.
 
+Under FPS, T2 is selected before T1 because T2 has a higher fixed priority.
+This ordering admits an execution in which T1 misses its deadline.
 
-Fixed-Priority Scheduling selects the ready task with the highest
+### Verification Results
 
-pre-assigned static priority.
+| Scenario | Policy | Result |
+|---|---|---|
+| Comparison workload | EDF | SATISFIED |
+| Comparison workload | FPS | NOT SATISFIED |
+| Unschedulable test case | EDF | NOT SATISFIED |
 
+The unschedulable EDF model is included as a separate negative test and is
+not part of the EDF–FPS comparison.
 
+## Automated Verification
 
-For the comparison workload, EDF and FPS use the same release times,
+A Python script executes UPPAAL `verifyta` automatically for multiple models
+and stores the verification results in CSV format.
 
-execution-time bounds, and deadlines. Under FPS, T1 can miss its deadline
+This provides a reproducible workflow for running and recording verification
+experiments.
 
-because T2 has a higher fixed priority.
+## Repository Structure
+
+```text
+models/
+  edf_3tasks_schedulable.xml
+  edf_3tasks_unschedulable.xml
+  edf_arrivals_3tasks.xml
+  edf_arrivals_3tasks_unschedulable.xml
+  fps_arrivals_3tasks.xml
+
+queries/
+  edf_arrivals.q
+
+scripts/
+  run_verification.py
+
+results/
+  verification_results.csv
+```
+
+## v1.0
+
+Initial non-preemptive EDF scheduling model with schedulable and
+unschedulable three-task configurations.
+
+## Current Status
+
+The project currently supports:
+
+- non-preemptive EDF scheduling
+- explicit task release times
+- deadline-miss verification
+- fixed-priority scheduling
+- EDF–FPS comparison using a common workload
+- automated verification through Python and `verifyta`
+- CSV-based result collection
 
