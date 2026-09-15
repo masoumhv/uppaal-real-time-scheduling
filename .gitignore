@@ -1,0 +1,6 @@
+# Generated PyUPPAAL files
+models/pyuppaal_test.xml
+models/pyuppaal_test_xtr-*
+
+# Local PyUPPAAL learning script
+scripts/test_pyuppaal.py
